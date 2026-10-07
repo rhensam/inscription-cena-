@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CENA — Inscriptions</title>
+<style>
+:root{--m:#5b3a29;--m2:#7a5238;--c:#f6f1ec;--b:#e2d6cb;--t:#2b1f18;--e:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.5 system-ui,sans-serif;color:var(--t);background:var(--c)}
+header{background:var(--m);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;cursor:pointer}
+.logo{width:48px;height:48px;border-radius:50%;background:#fff;color:var(--m);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+header b{display:block;font-size:15px;line-height:1.2}header small{opacity:.8}
+main{max-width:640px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:16px;margin:0 0 14px}
+h1{font-size:23px;margin:.2em 0}h2{font-size:18px;margin:14px 0 6px;color:var(--m)}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:12px;background:var(--m);color:#fff;font-weight:600;font-size:17px;font-family:inherit;padding:13px;margin:8px 0;cursor:pointer;text-align:center}
+.btn.alt{background:#fff;color:var(--m);border:2px solid var(--m)}
+.btn:disabled{opacity:.6}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:15px}
+input,select{width:100%;min-height:50px;font:inherit;padding:10px;border:1.5px solid var(--b);border-radius:10px;background:#fff}
+.err{color:var(--e);font-size:14px}
+.bar{height:8px;background:var(--b);border-radius:8px;overflow:hidden;margin:8px 0 14px}
+.bar i{display:block;height:100%;width:14%;background:var(--m2);transition:width .3s}
+.row{display:flex;gap:10px}.row .btn{flex:1}
+.f{font-size:15px;margin-top:4px}.f a{color:var(--m);font-weight:600;margin-left:8px}
+.hide{display:none!important}
+#fiche{display:none}
+@media print{body{background:#fff}header,main>*:not(#fiche){display:none!important}#fiche{display:block}}
+</style></head><body>
+<header onclick="show('home')"><div class="logo">CENA</div><div><b>Collège Évangélique Le Normalien de L'Arcahaie</b><small>Inscriptions</small></div></header>
+<main>
+<section id="home">
+ <div class="card"><h1>Inscriptions CENA</h1>
+ <p>Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p>
+ <button class="btn" onclick="start()">Faire une inscription</button>
+ <button class="btn alt" onclick="show('suivi')">Suivre mon inscription</button></div>
+ <div class="card"><h2 style="margin-top:0">Frais d'inscription : 1 000 HTG</h2><p>Vous téléversez la preuve de paiement dans le formulaire.</p></div>
+ <div class="card"><h2 style="margin-top:0">Les étapes</h2><ol><li>Informations de l'élève</li><li>Informations des parents</li><li>Personne responsable</li><li>Documents</li><li>Paiement</li><li>Vérification</li><li>Confirmation et fiche à imprimer</li></ol>
+ <p>Pour NS1 à NS4 : numéro d'ordre, fiche de 9ème année et relevé de notes sont aussi demandés.</p></div>
+</section>
+
+<section id="form" class="hide">
+ <div id="pt" style="font-weight:600"></div><div class="bar"><i id="pb"></i></div>
+ <div class="card"><input id="hp" class="hide" tabindex="-1" autocomplete="off"><div id="steps"></div></div>
+ <div id="msg" class="err"></div>
+ <button class="btn" id="next" onclick="nextStep()">Continuer</button>
+ <div class="row"><button class="btn alt" id="prev" onclick="go(cur-1)">Précédent</button><button class="btn alt" onclick="save()">Enregistrer</button></div>
+</section>
+
+<section id="done" class="hide card"></section>
+
+<section id="suivi" class="hide card"><h1>Suivre mon inscription</h1>
+ <label for="num">Numéro d'inscription</label><input id="num" placeholder="CENA-2026-00001" autocapitalize="characters">
+ <button class="btn" onclick="suivre()">Voir le statut</button><div id="sres"></div>
+ <button class="btn alt" onclick="show('home')">Retour à l'accueil</button></section>
+
+<div id="fiche"></div>
+</main>
+<script>
+// >>> Remplacer par l'adresse de votre fonction (Supabase > Edge Functions > cena)
+const API="https://msnvfuhbpsnfsirvevsu.supabase.co/functions/v1/cena";
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rows=o=>Object.entries(o).filter(e=>e[1]).map(([k,x])=>`<div class="f"><b>${k}</b> : ${esc(x)}</div>`).join("");
+const CL=[];for(let i=1;i<=9;i++)CL.push([i==1?"1ere_fond":i+"eme_fond",(i==1?"1ère":i+"ème")+" année fondamentale"]);
+for(let i=1;i<=4;i++)CL.push(["NS"+i,"NS"+i]);
+const clName=v=>(CL.find(x=>x[0]==v)||[])[1]||"";
+const P=g=>[["h",g=="pere"?"Père":"Mère"],[g,"nom","Nom","text"],[g,"prenom","Prénom","text"],
+ [g,"vivant","Statut","select",0,[["1",g=="pere"?"Vivant":"Vivante"],["0",g=="pere"?"Décédé":"Décédée"]]],
+ [g,"profession","Profession / occupation","text"],[g,"telephone","Téléphone","tel"],
+ [g,"residence","Résidence","text"],[g,"zone","Zone","text"],[g,"departement","Département","text"]];
+const R=[["nom","Nom"],["prenom","Prénom"],["profession","Profession / activité"],["cin","Numéro de carte d'identité"],["telephone","Téléphone","tel"],["residence","Résidence"],["zone","Zone"],["departement","Département"]].map(a=>["responsable",a[0],a[1],a[2]||"text",1]);
+const DOCS=[["acte_naissance","Acte de naissance"],["cin_responsable","Carte d'identité de la personne responsable"],["carnet","Carnet du dernier établissement fréquenté"],["photo","Photo récente"],["fiche_9eme","Fiche de 9ème année",1],["releve_notes","Relevé de notes de NS1 à NS4",1],["preuve_paiement","Preuve de paiement"]];
+const dl=k=>DOCS.find(x=>x[0]==k)[1];
+const STEPS=[
+["Informations de l'élève",[["eleve","nom","Nom","text",1],["eleve","prenom","Prénom","text",1],["eleve","date_naissance","Date de naissance","date",1],["eleve","lieu_naissance","Lieu de naissance","text",1],["eleve","sexe","Sexe","select",1,[["M","Masculin"],["F","Féminin"]]],["eleve","nisu","NISU (facultatif)","text"],["eleve","classe","Classe à intégrer","select",1,CL],["eleve","numero_ordre","Numéro d'ordre (NS1 à NS4)","text",1,0,1]]],
+["Informations des parents",[...P("pere"),...P("mere")]],
+["Personne responsable",R],
+["Documents requis",null],
+["Paiement de l'inscription",[["paiement","methode","Méthode de paiement","select",1,["MonCash","NatCash","Virement bancaire","Dépôt en espèces"].map(x=>[x,x])],["paiement","reference_transaction","Numéro / référence de transaction","text"],["paiement","date_paiement","Date du paiement","date"]]],
+["Vérification",null]];
+
+function fld(a){const[g,k,l,t,r,o,n]=a;if(g=="h")return`<h2>${k}</h2>`;
+ const id=g+"_"+k,at=`id="${id}" data-g="${g}" data-k="${k}"${r?' data-r="1"':""}`;
+ const i=t=="select"?`<select ${at} onchange="tg()"><option value="">Sélectionner</option>${o.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join("")}</select>`
+ :`<input ${at} type="${t}" ${t=="tel"?'inputmode="tel" ':""}${t=="date"?`max="${new Date().toISOString().slice(0,10)}" `:""}autocomplete="off">`;
+ return`<div class="${n?"ns hide":""}"><label for="${id}">${l}${r?" *":""}</label>${i}<div class="err" id="e_${id}"></div></div>`}
+const doc=([k,l,n])=>`<div class="${n?"ns hide":""}"><label>${l} *</label><label class="btn alt" for="d_${k}" id="b_${k}">Choisir un fichier</label><input type="file" class="hide" id="d_${k}" data-d="${k}" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onchange="pick('${k}')"><div class="f" id="i_${k}"></div><div class="err" id="e_d_${k}"></div></div>`;
+
+$("steps").innerHTML=STEPS.map((s,n)=>{let h=s[1]?s[1].map(fld).join(""):"";
+ if(n==3)h=DOCS.slice(0,6).map(doc).join("");
+ if(n==4)h=`<div class="card" style="background:var(--c)"><b>Montant à payer : 1 000 HTG</b></div>`+h+doc(DOCS[6]);
+ if(n==5)h='<div id="rev"></div>';
+ return`<div class="st hide" id="s${n}"><h2 style="margin-top:0">${s[0]}</h2>${h}</div>`}).join("");
+
+function tg(){const ns=/^NS[1-4]$/.test($("eleve_classe").value);document.querySelectorAll(".ns").forEach(e=>e.classList.toggle("hide",!ns))}
+function pick(k){const i=$("d_"+k),f=i.files[0];$("e_d_"+k).textContent="";if(!f)return clr(k);
+ if(!/\.(jpe?g|png|pdf)$/i.test(f.name)){i.value="";return fail(k,"Veuillez vérifier le format du fichier (JPG, PNG ou PDF).")}
+ if(f.size>5242880){i.value="";return fail(k,"Fichier trop volumineux (5 Mo maximum).")}
+ $("i_"+k).innerHTML=`📄 ${esc(f.name)}<br>${esc(f.type||"fichier")} · ${(f.size/1048576).toFixed(2)} Mo · ✔ Prêt à envoyer <a href="#" onclick="clr('${k}');return false">Supprimer</a>`;
+ $("b_"+k).textContent="Remplacer le fichier"}
+function fail(k,m){$("e_d_"+k).textContent=m;clr(k)}
+function clr(k){$("d_"+k).value="";$("i_"+k).innerHTML="";$("b_"+k).textContent="Choisir un fichier"}
+
+function data(){const d={site_web:$("hp").value};
+ ["eleve","pere","mere","responsable","paiement"].forEach(g=>{d[g]={};document.querySelectorAll(`[data-g=${g}]`).forEach(e=>{if(!e.closest(".ns.hide"))d[g][e.dataset.k]=e.value.trim()})});
+ ["pere","mere"].forEach(g=>d[g].vivant=d[g].vivant!="0");return d}
+function sum(d){const e=d.eleve,r=d.responsable,p=g=>{const x=d[g];return x.nom||x.prenom?rows({Nom:`${x.prenom||""} ${x.nom||""}`,Statut:x.vivant?"Vivant(e)":"Décédé(e)",Profession:x.profession,Téléphone:x.telephone,Résidence:[x.residence,x.zone,x.departement].filter(Boolean).join(", ")}):rows({Information:"Non renseignée"})};
+ const fs=DOCS.filter(x=>{const i=$("d_"+x[0]);return i&&i.files[0]&&!i.closest(".ns.hide")}).map(x=>x[1]);
+ return`<h2>Élève</h2>`+rows({Nom:e.nom,Prénom:e.prenom,"Date de naissance":e.date_naissance,"Lieu de naissance":e.lieu_naissance,Sexe:e.sexe=="M"?"Masculin":e.sexe=="F"?"Féminin":"",NISU:e.nisu,Classe:clName(e.classe),"Numéro d'ordre":e.numero_ordre})
+ +`<h2>Père</h2>${p("pere")}<h2>Mère</h2>${p("mere")}<h2>Responsable</h2>`
+ +rows({Nom:`${r.prenom} ${r.nom}`,Profession:r.profession,CIN:r.cin,Téléphone:r.telephone,Résidence:[r.residence,r.zone,r.departement].filter(Boolean).join(", ")})
+ +`<h2>Documents reçus</h2>`+fs.map(x=>`<div class="f">✔ ${x}</div>`).join("")
+ +`<h2>Paiement</h2>`+rows({Montant:"1 000 HTG",Méthode:d.paiement.methode,Référence:d.paiement.reference_transaction})}
+
+let cur=0;
+const show=id=>{["home","form","done","suivi"].forEach(x=>$(x).classList.toggle("hide",x!=id));scrollTo(0,0)};
+function start(){show("form");go(0)}
+function go(n){cur=n;document.querySelectorAll(".st").forEach((e,i)=>e.classList.toggle("hide",i!=n));
+ $("pt").textContent=`Étape ${n+1} sur 7 — ${STEPS[n][0]}`;$("pb").style.width=(n+1)/7*100+"%";
+ if(n==5)$("rev").innerHTML=sum(data());$("msg").textContent="";
+ $("prev").classList.toggle("hide",n==0);$("next").textContent=n==5?"Confirmer et envoyer l'inscription":"Continuer";scrollTo(0,0)}
+function ok(n){const s=$("s"+n);s.querySelectorAll(".err").forEach(e=>e.textContent="");let good=true,first;
+ const bad=(id,m)=>{$(id).textContent=m;good=false;first=first||$(id)};
+ s.querySelectorAll("[data-r]").forEach(e=>{if(e.closest(".ns.hide")||e.value.trim())return;bad("e_"+e.id,e.id=="eleve_classe"?"Veuillez sélectionner une classe.":"Ce champ est obligatoire.")});
+ s.querySelectorAll("[data-d]").forEach(e=>{if(e.closest(".ns.hide")||e.files[0])return;bad("e_d_"+e.dataset.d,e.dataset.d=="preuve_paiement"?"Veuillez téléverser la preuve de paiement.":"Ce document est obligatoire.")});
+ if(first)first.scrollIntoView({block:"center"});return good}
+function nextStep(){if(!ok(cur))return;cur==5?send():go(cur+1)}
+function save(){const o={};document.querySelectorAll("[data-g]").forEach(e=>o[e.id]=e.value);
+ try{localStorage.setItem("cena",JSON.stringify(o));$("msg").textContent="Brouillon enregistré sur ce téléphone (les fichiers ne sont pas sauvegardés)."}catch(_){}}
+
+async function send(){const b=$("next");b.disabled=true;b.textContent="Envoi en cours… ne fermez pas la page";
+ const d=data(),fd=new FormData();fd.append("data",JSON.stringify(d));
+ document.querySelectorAll("[data-d]").forEach(i=>{if(i.files[0]&&!i.closest(".ns.hide"))fd.append(i.dataset.d,i.files[0])});
+ let m="Connexion impossible. Vérifiez votre internet et réessayez.";
+ try{const r=await fetch(API+"/inscrire",{method:"POST",body:fd}),j=await r.json();if(r.ok)return done(j,d);m=[j.erreur,...Object.values(j.champs||{})].join(" ")}catch(_){}
+ $("msg").textContent=m;b.disabled=false;b.textContent="Confirmer et envoyer l'inscription"}
+function done(j,d){try{localStorage.removeItem("cena")}catch(_){}
+ const dt=new Date(j.cree_le).toLocaleDateString("fr-FR");
+ $("fiche").innerHTML=`<div style="text-align:center"><div class="logo" style="margin:auto;border:3px solid #5b3a29">CENA</div><h1>Collège Évangélique Le Normalien de L'Arcahaie</h1><h2>Fiche d'inscription</h2></div>`
+ +rows({"Numéro d'inscription":j.numero,Date:dt})+sum(d)+rows({"Statut du paiement":"En attente de vérification"})
+ +`<div style="display:flex;gap:20px;margin-top:30px"><div style="flex:1;border:1px solid #000;height:120px;padding:6px">Cachet de l'école</div><div style="flex:1;border:1px solid #000;height:120px;padding:6px">Signature</div></div>`;
+ $("done").innerHTML=`<h1>✅ Inscription envoyée avec succès.</h1>`+rows({"Numéro d'inscription":j.numero,Élève:`${d.eleve.prenom} ${d.eleve.nom}`,Classe:clName(d.eleve.classe),Date:dt,"Statut du dossier":"En attente de vérification","Statut du paiement":"En attente de vérification"})
+ +`<p><b>Notez bien votre numéro d'inscription.</b> Il sert à suivre votre dossier.</p><button class="btn" onclick="window.print()">Télécharger / Imprimer ma fiche</button><button class="btn alt" onclick="show('home')">Retour à l'accueil</button>`;
+ show("done")}
+
+const SL={inscription_recue:"Inscription reçue",en_attente_verification:"En attente de vérification",documents_incomplets:"Documents incomplets",paiement_en_attente:"Paiement en attente",paiement_a_verifier:"Paiement à vérifier",en_traitement:"Dossier en cours de traitement",valide:"Dossier validé",rejete:"Dossier rejeté"},
+PL={en_attente:"En attente de vérification",confirme:"Paiement confirmé",refuse:"Paiement refusé"};
+async function suivre(){const o=$("sres");o.textContent="Recherche…";
+ try{const r=await fetch(API+"/suivre",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({numero:$("num").value})}),j=await r.json();
+ if(!r.ok)return o.innerHTML=`<p class="err">${esc(j.erreur)}</p>`;
+ o.innerHTML=rows({"Numéro":j.numero,"Statut du dossier":SL[j.statut]||j.statut,"Paiement":PL[j.statut_paiement]||""})+(j.documents_manquants.length?`<p class="err">Document(s) manquant(s) : ${j.documents_manquants.map(k=>esc(dl(k))).join(", ")}</p>`:"")}
+ catch(_){o.innerHTML='<p class="err">Connexion impossible.</p>'}}
+
+try{const o=JSON.parse(localStorage.getItem("cena")||"{}");for(const k in o)if($(k))$(k).value=o[k]}catch(_){}
+tg();
+</script></body></html>
