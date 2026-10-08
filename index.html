@@ -324,3 +324,30 @@ function homeInit(){
 homeInit();
 init();
 </script></body></html>
+<style>
+/* Ajustement : les informations (frais, étapes) apparaissent plus vite */
+.hero{height:min(66svh,540px);min-height:460px}
+.hc{padding:16px 16px 20px}
+.ht{font-size:clamp(24px,6.6vw,40px);margin:10px 0 8px}
+.hp{font-size:15px;margin-bottom:12px}
+.hb{min-height:50px}.hb.s{min-height:44px}
+.nv{top:24%}
+#home{display:flex;flex-direction:column}
+#home>section{width:100%}
+#home>.ann{order:0}
+#home>.hero{order:1}
+#home>section:nth-of-type(3){order:2}
+#home>section:nth-of-type(2){order:3}
+#home>section:nth-of-type(4){order:4}
+#home>section:nth-of-type(5){order:5}
+#home>section:nth-of-type(6){order:6}
+@media(min-width:860px){.hero{height:560px}.nv{top:50%}}
+</style>
+<script>
+// Photos du carrousel venant de l'administration (remplacent les illustrations)
+(async()=>{try{const r=await fetch(API+"/config",{method:"POST"});if(!r.ok)return;const c=await r.json();
+ const P=(c.photos||[]).filter(p=>p&&p.src);if(!P.length)return;
+ $("cs").innerHTML=P.map((p,i)=>`<div class="sl${i?"":" on"}"><img src="${esc(p.src)}" alt="${esc(p.titre||"Élèves du CENA")}"${i?' loading="lazy"':""}></div>`).join("");
+ $("dts").innerHTML=P.map((p,i)=>`<button class="dt${i?"":" on"}" aria-label="Photo ${i+1}" onclick="goS(${i})"></button>`).join("");
+ ci=0;play()}catch(_){}})();
+</script>
