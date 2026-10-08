@@ -1,44 +1,154 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CENA — Inscriptions</title>
+<meta name="theme-color" content="#5b3a29">
+<title>CENA — Inscriptions en ligne</title>
 <style>
-:root{--m:#5b3a29;--m2:#7a5238;--c:#f6f1ec;--b:#e2d6cb;--t:#2b1f18;--e:#b3261e}
+:root{--m:#5b3a29;--m2:#7a5238;--m3:#3f271b;--g:#c9a46a;--c:#f6f1ec;--b:#e2d6cb;--t:#2b1f18;--e:#b3261e;--sh:0 10px 28px rgba(59,36,24,.14);--sh2:0 2px 8px rgba(59,36,24,.08);--serif:Georgia,"Times New Roman",serif}
 *{box-sizing:border-box}
-body{margin:0;font:17px/1.5 system-ui,sans-serif;color:var(--t);background:var(--c)}
-header{background:var(--m);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;cursor:pointer}
-.logo{width:48px;height:48px;border-radius:50%;background:#fff;color:var(--m);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
-header b{display:block;font-size:15px;line-height:1.2}header small{opacity:.8}
+html{scroll-behavior:smooth}
+body{margin:0;font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--t);background:var(--c);-webkit-text-size-adjust:100%}
+/* En-tête */
+header{background:var(--m);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.hin{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0;flex:1}
+.logo{width:48px;height:48px;border-radius:50%;background:#fff;color:var(--m);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;border:2px solid var(--g);overflow:hidden}
+.brand b{display:block;font-family:var(--serif);font-size:15px;line-height:1.2}
+.brand small{opacity:.8;font-size:12px;letter-spacing:.5px;text-transform:uppercase}
+#mb{background:rgba(255,255,255,.12);border:0;color:#fff;width:46px;height:46px;border-radius:12px;font-size:22px;cursor:pointer}
+#nv{display:none;position:absolute;top:100%;left:0;right:0;background:var(--m3);flex-direction:column;padding:6px 16px 14px;box-shadow:0 12px 20px rgba(0,0,0,.25)}
+#nv.open{display:flex}
+.nl{background:none;border:0;border-bottom:1px solid rgba(255,255,255,.12);color:#fff;text-align:left;padding:15px 4px;font-size:16px;font-family:inherit;cursor:pointer}
+@media(min-width:760px){#mb{display:none}#nv{position:static;display:flex;flex-direction:row;background:none;padding:0;box-shadow:none;gap:4px}.nl{border:0;padding:10px 14px;border-radius:10px}.nl:hover{background:rgba(255,255,255,.14)}.brand b{font-size:17px}}
+/* Accueil */
+.ann{background:#fff7e6;border-bottom:3px solid var(--g);padding:12px 16px;text-align:center;white-space:pre-line;font-weight:600;color:var(--m3)}
+.hero{position:relative;height:calc(100svh - 70px);min-height:560px;max-height:720px;overflow:hidden;background:#2b1f18;border-radius:0 0 28px 28px;touch-action:pan-y}
+.sl{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;background-size:cover;background-position:center}
+.sl.on{opacity:1}
+.sl img{width:100%;height:100%;object-fit:cover;display:block}
+.hc{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:22px 18px 26px;color:#fff;background:linear-gradient(to top,rgba(43,31,24,.97),rgba(43,31,24,.9) 72%,rgba(43,31,24,.6));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:26px 26px 0 0}
+.chip{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:4px 14px;border-radius:99px;font-size:13px;letter-spacing:.4px}
+.ht{font-family:var(--serif);font-size:clamp(26px,7vw,44px);line-height:1.12;margin:12px 0 10px;font-weight:700}
+.hp{font-size:16px;opacity:.94;margin:0 0 16px;max-width:34em}
+.hbs{display:flex;flex-direction:column;gap:8px}
+.hb{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;width:100%;border-radius:14px;font-weight:700;font-size:16px;font-family:inherit;border:2px solid transparent;cursor:pointer;padding:0 18px;transition:transform .15s,box-shadow .15s}
+.hb:active{transform:scale(.98)}
+.hb.p{background:#fff;color:var(--m);box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.hb.s{background:transparent;color:#fff;border-color:rgba(255,255,255,.7);min-height:48px}
+.nv{position:absolute;top:28%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.88);color:var(--m);font-size:26px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:3}
+.nv.pv{left:10px}.nv.nx{right:10px}
+.dts{position:absolute;left:0;right:0;top:12px;display:flex;justify-content:center;gap:4px;z-index:3}
+.dt{border:0;background:none;padding:8px 4px;cursor:pointer}
+.dt:before{content:"";display:block;width:9px;height:9px;border-radius:99px;background:rgba(255,255,255,.6);transition:width .3s,background .3s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.dt.on:before{width:24px;background:#fff}
+@media(min-width:520px){.hbs{flex-direction:row}}
+@media(min-width:860px){.hero{height:620px;max-height:none;border-radius:0 0 34px 34px}.hc{left:max(16px,calc(50% - 540px));right:auto;bottom:44px;width:min(580px,calc(100% - 32px));border-radius:24px;padding:28px}.nv{top:50%}}
+/* Sections */
+.sec{max-width:1080px;margin:0 auto;padding:38px 16px 4px}
+.st{font-family:var(--serif);font-size:clamp(22px,5.5vw,30px);color:var(--m);margin:0 0 6px}
+.sub{color:#6b5a50;margin:0 0 20px}
+.gr{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:600px){.gr{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.gr.g4{grid-template-columns:repeat(4,1fr)}}
+.sc{background:#fff;border:1px solid var(--b);border-radius:18px;padding:18px;box-shadow:var(--sh2)}
+.sc h3{font-family:var(--serif);font-size:18px;margin:10px 0 4px;color:var(--m)}
+.sc p{margin:0;color:#6b5a50;font-size:15px}
+.n{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--m);color:#fff;font-weight:800}
+.fee{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,#fff,#fbf5ee);border:1px solid var(--b);border-left:6px solid var(--g);border-radius:18px;padding:20px;box-shadow:var(--sh)}
+.fi{font-size:34px}
+.fee h2{font-family:var(--serif);font-size:clamp(20px,5vw,26px);margin:0 0 4px;color:var(--m)}
+.fee p{margin:0;color:#6b5a50;white-space:pre-line}
+.dc{background:#fff;border:1px solid var(--b);border-radius:14px;padding:14px 16px;box-shadow:var(--sh2);font-weight:600}
+.note{margin-top:12px;color:#6b5a50;font-size:15px}
+.ab{background:#fff;border:1px solid var(--b);border-radius:18px;padding:22px;box-shadow:var(--sh2)}
+.ab p{margin:0;white-space:pre-line}
+.band{background:linear-gradient(135deg,var(--m3),var(--m2));color:#fff;border-radius:22px;padding:28px 20px;text-align:center;box-shadow:var(--sh);margin-bottom:34px}
+.band h2{font-family:var(--serif);color:#fff;font-size:clamp(22px,6vw,30px);margin:0 0 16px}
+.band .hb{max-width:420px;margin:0 auto}
+/* Pied de page */
+footer{background:var(--m3);color:#e9ddd3;margin-top:30px}
+.fin{max-width:1080px;margin:0 auto;padding:34px 16px 10px;display:grid;gap:26px;grid-template-columns:1fr}
+@media(min-width:760px){.fin{grid-template-columns:1.4fr 1fr 1fr}}
+.fb{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.fb b{font-family:var(--serif);color:#fff;line-height:1.25}
+footer h4{margin:0 0 10px;color:#fff;font-family:var(--serif);font-size:17px}
+footer p{margin:4px 0;font-size:15px}
+.lk{display:block;background:none;border:0;color:#e9ddd3;padding:7px 0;font:inherit;font-size:15px;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}
+.cp{max-width:1080px;margin:0 auto;padding:16px;border-top:1px solid rgba(255,255,255,.14);font-size:13px;opacity:.85;text-align:center}
+/* Animations légères */
+.rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.rv.vs{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.sl{transition:none}html{scroll-behavior:auto}}
+/* Formulaire et autres pages (apparence) */
 main{max-width:640px;margin:0 auto;padding:16px}
-.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:16px;margin:0 0 14px}
-h1{font-size:23px;margin:.2em 0}h2{font-size:18px;margin:14px 0 6px;color:var(--m)}
-.btn{display:block;width:100%;min-height:52px;border:0;border-radius:12px;background:var(--m);color:#fff;font-weight:600;font-size:17px;font-family:inherit;padding:13px;margin:8px 0;cursor:pointer;text-align:center}
-.btn.alt{background:#fff;color:var(--m);border:2px solid var(--m)}
+body.onhome main{display:none}
+.card{background:#fff;border:1px solid var(--b);border-radius:16px;padding:16px;margin:0 0 14px;box-shadow:var(--sh2)}
+h1{font-family:var(--serif);font-size:23px;margin:.2em 0}h2{font-size:18px;margin:14px 0 6px;color:var(--m)}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--m);color:#fff;font-weight:600;font-size:17px;font-family:inherit;padding:13px;margin:8px 0;cursor:pointer;text-align:center;box-shadow:0 4px 12px rgba(91,58,41,.25)}
+.btn.alt{background:#fff;color:var(--m);border:2px solid var(--m);box-shadow:none}
 .btn:disabled{opacity:.6}
 label{display:block;font-weight:600;margin:12px 0 4px;font-size:15px}
-input,select{width:100%;min-height:50px;font:inherit;padding:10px;border:1.5px solid var(--b);border-radius:10px;background:#fff}
+input,select{width:100%;min-height:50px;font:inherit;padding:10px;border:1.5px solid var(--b);border-radius:12px;background:#fff}
+input:focus,select:focus{outline:none;border-color:var(--m2);box-shadow:0 0 0 3px rgba(122,82,56,.18)}
 .err{color:var(--e);font-size:14px}
 .bar{height:8px;background:var(--b);border-radius:8px;overflow:hidden;margin:8px 0 14px}
-.bar i{display:block;height:100%;width:14%;background:var(--m2);transition:width .3s}
+.bar i{display:block;height:100%;width:14%;background:linear-gradient(90deg,var(--m2),var(--g));transition:width .3s}
 .row{display:flex;gap:10px}.row .btn{flex:1}
 .f{font-size:15px;margin-top:4px}.f a{color:var(--m);font-weight:600;margin-left:8px}
 .hide{display:none!important}
 #fiche{display:none}
-@media print{body{background:#fff}header,main>*:not(#fiche){display:none!important}#fiche{display:block}}
-</style></head><body>
-<header onclick="show('home')"><div class="logo">CENA</div><div><b>Collège Évangélique Le Normalien de L'Arcahaie</b><small>Inscriptions</small></div></header>
-<main>
-<section id="home">
- <div class="card"><h1>Inscriptions CENA</h1>
- <p id="intro">Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p>
- <div id="annonce" class="hide" style="background:var(--c);border-left:4px solid var(--m);padding:10px 12px;border-radius:8px;white-space:pre-line"></div>
- <button class="btn" onclick="start()">Faire une inscription</button>
- <button class="btn alt" onclick="show('suivi')">Suivre mon inscription</button></div>
- <div class="card"><h2 style="margin-top:0" id="frais">Frais d'inscription : 1 000 HTG</h2><p id="fnote" style="white-space:pre-line">Vous téléversez la preuve de paiement dans le formulaire.</p></div>
- <div class="card"><h2 style="margin-top:0">Les étapes</h2><ol><li>Informations de l'élève</li><li>Informations des parents</li><li>Personne responsable</li><li>Documents</li><li>Paiement</li><li>Vérification</li><li>Confirmation et fiche à imprimer</li></ol>
- <p>Pour NS1 à NS4 : numéro d'ordre et fiche de 9ème année. Pour NS2 à NS4, le relevé de notes de la classe précédente peut être joint (facultatif).</p></div>
-</section>
+@media print{body{background:#fff}header,footer,#home,main>*:not(#fiche){display:none!important}#fiche{display:block}body.onhome main{display:block}}
+</style></head><body class="onhome">
+<header><div class="hin">
+ <div class="brand" onclick="show('home')"><div class="logo">CENA</div><div><b>Collège Évangélique Le Normalien de L'Arcahaie</b><small>Inscriptions en ligne</small></div></div>
+ <button id="mb" aria-label="Menu" onclick="$('nv').classList.toggle('open')">☰</button>
+ <nav id="nv">
+  <button class="nl" onclick="menu(()=>show('home'))">Accueil</button>
+  <button class="nl" onclick="menu(start)">Faire une inscription</button>
+  <button class="nl" onclick="menu(()=>show('suivi'))">Suivre mon inscription</button>
+  <button class="nl" onclick="menu(()=>$('ft').scrollIntoView({behavior:'smooth'}))">Contact</button>
+ </nav>
+</div></header>
 
+<div id="home">
+ <div id="annonce" class="hide ann"></div>
+ <section class="hero" id="car">
+  <div id="cs"></div>
+  <div class="hc rv">
+   <span class="chip">🎓 Inscriptions en ligne</span>
+   <h1 class="ht">BYENVENI SOU PLATFÒM INSCRIPTION CENA</h1>
+   <p class="hp">Fè inscription pitit ou sou entènèt, depi nan telefòn ou, nan kèk minit.</p>
+   <div class="hbs"><button class="hb p" onclick="start()">COMMENCER MON INSCRIPTION →</button><button class="hb s" onclick="show('suivi')">Suivre mon inscription</button></div>
+  </div>
+  <button class="nv pv" aria-label="Photo précédente" onclick="goS(ci-1)">‹</button>
+  <button class="nv nx" aria-label="Photo suivante" onclick="goS(ci+1)">›</button>
+  <div class="dts" id="dts"></div>
+ </section>
+
+ <section class="sec rv"><h2 class="st">Comment ça marche</h2><p class="sub">Quatre étapes simples, entièrement depuis votre téléphone.</p>
+  <div class="gr g4">
+   <div class="sc"><span class="n">1</span><h3>Remplissez le formulaire</h3><p>Élève, parents et personne responsable, étape par étape.</p></div>
+   <div class="sc"><span class="n">2</span><h3>Joignez vos documents</h3><p>Photo, acte de naissance, carnet… directement depuis votre téléphone.</p></div>
+   <div class="sc"><span class="n">3</span><h3>Payez et envoyez la preuve</h3><p>Les frais sont indiqués ci-dessous. Ajoutez la preuve de paiement.</p></div>
+   <div class="sc"><span class="n">4</span><h3>Recevez votre fiche</h3><p>Un numéro d'inscription unique et une fiche à imprimer.</p></div>
+  </div></section>
+
+ <section class="sec rv"><div class="fee"><div class="fi">💳</div><div><h2 id="frais">Frais d'inscription : 1 000 HTG</h2><p id="fnote">Vous téléversez la preuve de paiement dans le formulaire.</p></div></div></section>
+
+ <section class="sec rv"><h2 class="st">Documents à préparer</h2><p class="sub">Ayez ces documents sous la main (photo ou PDF). La liste exacte s'affiche dans le formulaire.</p>
+  <div class="gr">
+   <div class="dc">📄 Acte de naissance</div><div class="dc">🪪 Carte d'identité de la personne responsable</div>
+   <div class="dc">📘 Carnet du dernier établissement fréquenté</div><div class="dc">🖼️ Photo récente</div>
+   <div class="dc">🧾 Preuve de paiement</div>
+  </div>
+  <p class="note">NS1 à NS4 : numéro d'ordre et fiche de 9ème année. NS2 à NS4 : le relevé de notes de la classe précédente peut être joint (facultatif).</p></section>
+
+ <section class="sec rv"><div class="ab"><h2 class="st">Le collège</h2><p id="intro">Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p></div></section>
+
+ <section class="sec rv"><div class="band"><h2>Prêt à inscrire votre enfant ?</h2><button class="hb p" onclick="start()">COMMENCER MON INSCRIPTION →</button></div></section>
+</div>
+
+<main>
 <section id="form" class="hide">
  <div id="pt" style="font-weight:600"></div><div class="bar"><i id="pb"></i></div>
  <div class="card"><input id="hp" class="hide" tabindex="-1" autocomplete="off"><div id="steps"></div></div>
@@ -56,7 +166,14 @@ input,select{width:100%;min-height:50px;font:inherit;padding:10px;border:1.5px s
 
 <div id="fiche"></div>
 </main>
+
+<footer id="ft"><div class="fin">
+ <div><div class="fb"><div class="logo">CENA</div><b>Collège Évangélique Le Normalien de L'Arcahaie</b></div><p>Plateforme d'inscription en ligne de l'établissement.</p></div>
+ <div><h4>Informations</h4><button class="lk" onclick="start()">Faire une inscription</button><button class="lk" onclick="show('suivi')">Suivre mon inscription</button><p>Gardez votre numéro d'inscription : il permet de suivre votre dossier.</p></div>
+ <div><h4>Contact</h4><p>📍 L'Arcahaie, Haïti</p><p id="ct_tel" class="hide"></p><p id="ct_mail" class="hide"></p></div>
+</div><div class="cp">© <span id="yr"></span> Collège Évangélique Le Normalien de L'Arcahaie (CENA). Tous droits réservés.</div></footer>
 <script>
+// >>> Remplacer par l'adresse de votre fonction (Supabase > Edge Functions > cena)
 const API="https://msnvfuhbpsnfsirvevsu.supabase.co/functions/v1/CENA";
 
 const $=id=>document.getElementById(id);
@@ -70,6 +187,7 @@ const P=g=>[["h",g=="pere"?"Père":"Mère"],[g,"nom","Nom","text"],[g,"prenom","
  [g,"profession","Profession / occupation","text"],[g,"telephone","Téléphone","tel"],
  [g,"residence","Résidence","text"],[g,"zone","Zone","text"],[g,"departement","Département","text"]];
 const R=[["nom","Nom"],["prenom","Prénom"],["profession","Profession / activité"],["cin","Numéro de carte d'identité"],["telephone","Téléphone","tel"],["residence","Résidence"],["zone","Zone"],["departement","Département"]].map(a=>["responsable",a[0],a[1],a[2]||"text",1]);
+// Configuration par défaut (remplacée par celle de l'administration au chargement)
 const D0=(l,r)=>({label:l,requis:r,actif:true});
 let CFG={frais_htg:1000,methodes_paiement:["MonCash","NatCash","Virement bancaire","Dépôt en espèces"],
  accueil_intro:"",annonce:"",frais_note:"",paiement_instructions:"",
@@ -135,7 +253,7 @@ function sum(d){const e=d.eleve,r=d.responsable,p=g=>{const x=d[g];return x.nom|
  +`<h2>Paiement</h2>`+rows({Montant:fmt(CFG.frais_htg),Méthode:d.paiement.methode,Référence:d.paiement.reference_transaction})}
 
 let cur=0;
-const show=id=>{["home","form","done","suivi"].forEach(x=>$(x).classList.toggle("hide",x!=id));scrollTo(0,0)};
+const show=id=>{["home","form","done","suivi"].forEach(x=>$(x).classList.toggle("hide",x!=id));document.body.classList.toggle("onhome",id=="home");scrollTo(0,0)};
 function start(){show("form");go(0)}
 function go(n){cur=n;document.querySelectorAll(".st").forEach((e,i)=>e.classList.toggle("hide",i!=n));
  $("pt").textContent=`Étape ${n+1} sur 7 — ${STEPS[n][0]}`;$("pb").style.width=(n+1)/7*100+"%";
@@ -173,5 +291,36 @@ async function suivre(){const o=$("sres");o.textContent="Recherche…";
  o.innerHTML=rows({"Numéro":j.numero,"Statut du dossier":SL[j.statut]||j.statut,"Paiement":PL[j.statut_paiement]||""})+(j.documents_manquants.length?`<p class="err">Document(s) manquant(s) : ${j.documents_manquants.map(k=>esc(dl(k))).join(", ")}</p>`:"")}
  catch(_){o.innerHTML='<p class="err">Connexion impossible.</p>'}}
 
+// ===== Apparence de l'accueil (aucune logique d'inscription ici) =====
+const LOGO_URL="";                  // ex. "logo-cena.png" (fichier à mettre dans le dépôt)
+const CONTACT={tel:"",email:""};    // ex. {tel:"+509 ...",email:"..."}
+// Photos du carrousel : remplacez par vos photos, ex. [{src:"eleve1.jpg",titre:"Nos élèves"}]
+const PHOTOS=[];
+const DEMO=[
+ {svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dcb4"/><stop offset="1" stop-color="#d9a678"/></linearGradient></defs><rect x="-300" width="1200" height="800" fill="url(#g)"/><circle cx="470" cy="190" r="70" fill="#fff3d6" opacity=".9"/><rect x="60" y="360" width="480" height="200" fill="#f7efe6"/><polygon points="40,360 300,250 560,360" fill="#7a5238"/><rect x="270" y="440" width="60" height="120" fill="#5b3a29"/><g fill="#c9a46a"><rect x="100" y="410" width="50" height="60"/><rect x="190" y="410" width="50" height="60"/><rect x="360" y="410" width="50" height="60"/><rect x="450" y="410" width="50" height="60"/></g><rect x="298" y="170" width="4" height="80" fill="#5b3a29"/><polygon points="302,170 352,185 302,200" fill="#b3261e"/><rect x="-300" y="560" width="1200" height="240" fill="#6f8f4e"/><rect x="270" y="560" width="60" height="240" fill="#e9dccb"/></svg>`},
+ {svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f271b"/><stop offset="1" stop-color="#8a5a3c"/></linearGradient></defs><rect x="-300" width="1200" height="800" fill="url(#g)"/><circle cx="130" cy="140" r="90" fill="#c9a46a" opacity=".18"/><rect x="150" y="470" width="300" height="52" rx="6" fill="#c9a46a"/><rect x="170" y="418" width="260" height="52" rx="6" fill="#f6f1ec"/><rect x="190" y="366" width="220" height="52" rx="6" fill="#b3764a"/><polygon points="300,200 470,272 300,344 130,272" fill="#1f130d"/><path d="M200 306v52q100 46 200 0v-52l-100 44z" fill="#2b1f18"/><line x1="440" y1="284" x2="440" y2="360" stroke="#c9a46a" stroke-width="5"/><circle cx="440" cy="368" r="9" fill="#c9a46a"/></svg>`},
+ {svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe9c6"/><stop offset="1" stop-color="#d9a470"/></linearGradient></defs><rect x="-300" width="1200" height="800" fill="url(#g)"/><circle cx="300" cy="470" r="150" fill="#fff4d8"/><path d="M-300 520q300-80 600-30t600-20v330H-300z" fill="#8a5a3c"/><path d="M-300 600q350-70 640-20t560-10v230H-300z" fill="#5b3a29"/><path d="M270 800q20-140 30-230 10 90 40 230z" fill="#e9dccb"/></svg>`}];
+let ci=0,ct;
+function goS(n){const s=document.querySelectorAll(".sl"),d=document.querySelectorAll(".dt");if(!s.length)return;
+ ci=(n+s.length)%s.length;s.forEach((e,i)=>e.classList.toggle("on",i==ci));d.forEach((e,i)=>e.classList.toggle("on",i==ci));play()}
+function play(){clearInterval(ct);if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;ct=setInterval(()=>goS(ci+1),4500)}
+function menu(a){$("nv").classList.remove("open");a()}
+function homeInit(){
+ if(LOGO_URL)document.querySelectorAll(".logo").forEach(l=>l.innerHTML=`<img src="${esc(LOGO_URL)}" alt="CENA" style="width:100%;height:100%;object-fit:contain">`);
+ const S=PHOTOS.length?PHOTOS:DEMO;
+ const bg=v=>`url('data:image/svg+xml,${encodeURIComponent(v)}')`;
+ $("cs").innerHTML=S.map((s,i)=>s.src?`<div class="sl${i?"":" on"}"><img src="${esc(s.src)}" alt="${esc(s.titre||"Élèves du CENA")}"${i?' loading="lazy"':""}></div>`:`<div class="sl${i?"":" on"}" style="background-image:${bg(s.svg)}"></div>`).join("");
+ $("dts").innerHTML=S.map((s,i)=>`<button class="dt${i?"":" on"}" aria-label="Photo ${i+1}" onclick="goS(${i})"></button>`).join("");
+ if(CONTACT.tel){$("ct_tel").textContent="📞 "+CONTACT.tel;$("ct_tel").classList.remove("hide")}
+ if(CONTACT.email){$("ct_mail").textContent="✉️ "+CONTACT.email;$("ct_mail").classList.remove("hide")}
+ $("yr").textContent=new Date().getFullYear();
+ const car=$("car");let x0=null;
+ car.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;clearInterval(ct)},{passive:true});
+ car.addEventListener("touchend",e=>{if(x0!==null){const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)goS(ci+(dx<0?1:-1));else play()}x0=null});
+ car.addEventListener("mouseenter",()=>clearInterval(ct));car.addEventListener("mouseleave",play);
+ const io="IntersectionObserver"in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("vs");io.unobserve(e.target)}}),{threshold:.12}):null;
+ document.querySelectorAll(".rv").forEach(e=>io?io.observe(e):e.classList.add("vs"));
+ play()}
+homeInit();
 init();
 </script></body></html>
