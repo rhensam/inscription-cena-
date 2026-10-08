@@ -177,3 +177,11 @@ async function saveSet(){const f=parseInt($("s_f").value,10),m=$("s_m").value.sp
 
 start();
 </script></body></html>
+<script>
+async function dopen(i,dl){const d=D.documents[i],box=$("pv"+i);box.textContent="Chargement…";
+ const{data,error}=await sb.storage.from("dossiers").download(d.chemin);
+ if(error||!data){box.innerHTML=`<p class="err">${esc((error&&error.message)||"Fichier introuvable")}</p>`;return}
+ const u=URL.createObjectURL(data);
+ if(dl||d.mime=="application/pdf")box.innerHTML=`<a class="btn" style="text-decoration:none" href="${u}" download="${esc(d.nom_original)}">Appuyez ici pour télécharger</a>`;
+ else box.innerHTML=`<img src="${u}" alt="" style="width:100%;border-radius:10px;margin-top:8px">`}
+</script>
