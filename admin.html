@@ -107,7 +107,7 @@ async function ouvrir(id){tab("det");$("det").textContent="Chargement…";
 function render(){const r=D,p=one(r.paiements)||{};
  const ds=(r.documents||[]).map((d,i)=>`<div class="card" style="margin:8px 0;padding:12px"><b>${DOCL[d.type]||d.type}</b> ${d.verifie?"✔ vérifié":""} ${d.manquant_signale?"⚠ à refaire":""}<div class="f">${esc(d.nom_original)} · ${(d.taille_octets/1048576).toFixed(2)} Mo</div>
   <div class="row"><button class="btn alt" onclick="dopen(${i},0)">Ouvrir</button><button class="btn alt" onclick="dopen(${i},1)">Télécharger</button></div>
-  <div class="row"><button class="btn alt" onclick="dflag('${d.id}','verifie',${!d.verifie})">${d.verifie?"Retirer « vérifié »":"Marquer vérifié"}</button><button class="btn alt" onclick="dflag('${d.id}','manquant_signale',${!d.manquant_signale})">${d.manquant_signale?"Retirer le signalement":"Signaler à refaire"}</button></div></div>`).join("");
+  <div class="row"><button class="btn alt" onclick="dflag('${d.id}','verifie',${!d.verifie})">${d.verifie?"Retirer « vérifié »":"Marquer vérifié"}</button><button class="btn alt" onclick="dflag('${d.id}','manquant_signale',${!d.manquant_signale})">${d.manquant_signale?"Retirer le signalement":"Signaler à refaire"}</button></div><div id="pv${i}"></div></div>`).join("");
  const rem=(r.remarques||[]).slice().sort((a,b)=>b.cree_le.localeCompare(a.cree_le)).map(x=>`<div class="f">• ${esc(x.texte)} <i>(${new Date(x.cree_le).toLocaleDateString("fr-FR")})</i></div>`).join("");
  $("det").innerHTML=`<button class="btn alt" onclick="tab('list')">← Retour aux dossiers</button>
  <div class="card"><h1>${esc(r.prenom)} ${esc(r.nom)}</h1><div class="f"><b>${r.numero}</b> · ${new Date(r.cree_le).toLocaleString("fr-FR")}</div>
@@ -133,9 +133,12 @@ async function decide(s){const l={valide:"accepter ce dossier",rejete:"refuser c
  if(m.trim()){const u=(await sb.auth.getUser()).data.user;await sb.from("remarques").insert({inscription_id:D.id,texte:SL[s]+" — "+m.trim(),auteur:u.id})}
  await load();ouvrir(D.id)}
 async function dflag(id,f,v){if(await upd("documents",{id},{[f]:v}))ouvrir(D.id)}
-async function dopen(i,dl){const d=D.documents[i];
- const{data,error}=await sb.storage.from("dossiers").createSignedUrl(d.chemin,300,dl?{download:true}:undefined);
- if(error)return alert("Erreur : "+error.message);window.open(data.signedUrl,"_blank")}
+async function dopen(i,dl){const d=D.documents[i],box=$("pv"+i);box.textContent="Chargement…";
+ const{data,error}=await sb.storage.from("dossiers").createSignedUrl(d.chemin,600,dl?{download:d.nom_original}:undefined);
+ if(error){box.innerHTML=`<p class="err">${esc(error.message)}</p>`;return}
+ const u=data.signedUrl;
+ if(dl||d.mime=="application/pdf")box.innerHTML=`<a class="btn" style="text-decoration:none" href="${u}" ${dl?"download":'target="_blank"'}>${dl?"Appuyez ici pour télécharger":"Appuyez ici pour ouvrir le PDF"}</a>`;
+ else box.innerHTML=`<img src="${u}" alt="" style="max-width:100%;border-radius:10px;margin-top:8px"><a class="btn alt" style="text-decoration:none" href="${u}" target="_blank">Agrandir</a>`}
 async function addr(){const t=$("rt").value.trim();if(!t)return;const u=(await sb.auth.getUser()).data.user;
  const{error}=await sb.from("remarques").insert({inscription_id:D.id,texte:t,auteur:u.id});if(error)return alert("Erreur : "+error.message);ouvrir(D.id)}
 
