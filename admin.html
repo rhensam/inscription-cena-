@@ -185,3 +185,32 @@ async function dopen(i,dl){const d=D.documents[i],box=$("pv"+i);box.textContent=
  if(dl||d.mime=="application/pdf")box.innerHTML=`<a class="btn" style="text-decoration:none" href="${u}" download="${esc(d.nom_original)}">Appuyez ici pour télécharger</a>`;
  else box.innerHTML=`<img src="${u}" alt="" style="width:100%;border-radius:10px;margin-top:8px">`}
 </script>
+<script>
+// ===== Photos du carrousel (gérées depuis l'administration) =====
+const _sets=sets;
+sets=async function(){await _sets();if(CFG)photosUI()};
+function photosUI(){let box=$("phbox");
+ if(!box){box=document.createElement("div");box.id="phbox";box.className="card";$("set").insertBefore(box,$("set").firstChild)}
+ const P=CFG.photos||[];
+ box.innerHTML=`<h2 style="margin-top:0">Photos du carrousel (page d'accueil)</h2><div class="f">Ajoutez les photos des élèves : elles passent automatiquement sur la page d'accueil. Les photos sont réduites avant l'envoi.</div>`
+ +P.map((p,i)=>`<div class="card" style="margin:10px 0;padding:10px"><img src="${esc(p.src)}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px"><div class="row"><button class="btn alt" onclick="phMove(${i},-1)">↑ Monter</button><button class="btn alt" onclick="phMove(${i},1)">↓ Descendre</button></div><button class="btn alt" onclick="phDel(${i})">Supprimer cette photo</button></div>`).join("")
+ +`<label class="btn" for="phf">+ Ajouter des photos</label><input id="phf" type="file" accept="image/*" multiple class="hide" onchange="phAdd(this.files)"><div id="phm" class="f"></div>`}
+function shrink(f,max=1600,q=.82){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(f);
+ im.onload=()=>{const r=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
+ c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?ok(b):no(new Error("compression impossible")),"image/jpeg",q)};
+ im.onerror=()=>no(new Error("image illisible"));im.src=u})}
+async function phAdd(fs){const m=$("phm"),P=[...(CFG.photos||[])];
+ for(const f of fs){m.textContent="Envoi de "+f.name+"…";
+  try{const b=await shrink(f),n=Date.now()+"-"+Math.random().toString(36).slice(2,8)+".jpg";
+   const{error}=await sb.storage.from("carousel").upload(n,b,{contentType:"image/jpeg",cacheControl:"31536000"});if(error)throw error;
+   P.push({src:sb.storage.from("carousel").getPublicUrl(n).data.publicUrl,titre:"",chemin:n})}
+  catch(e){m.textContent="Erreur : "+(e.message||e);return}}
+ await phSave(P)}
+async function phSave(P){const cfg={...CFG,photos:P};
+ const{error}=await sb.from("parametres").update({config:cfg,maj_le:new Date().toISOString()}).eq("id",1);
+ if(error){alert("Erreur : "+error.message);return}
+ CFG=cfg;photosUI();$("phm").textContent="✔ Enregistré. La page d'accueil sera à jour en moins d'une minute."}
+async function phDel(i){if(!confirm("Supprimer cette photo ?"))return;const P=[...(CFG.photos||[])],[p]=P.splice(i,1);
+ if(p&&p.chemin)await sb.storage.from("carousel").remove([p.chemin]);await phSave(P)}
+async function phMove(i,d){const P=[...(CFG.photos||[])],j=i+d;if(j<0||j>=P.length)return;[P[i],P[j]]=[P[j],P[i]];await phSave(P)}
+</script>
