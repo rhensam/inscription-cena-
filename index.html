@@ -30,12 +30,13 @@ input,select{width:100%;min-height:50px;font:inherit;padding:10px;border:1.5px s
 <main>
 <section id="home">
  <div class="card"><h1>Inscriptions CENA</h1>
- <p>Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p>
+ <p id="intro">Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p>
+ <div id="annonce" class="hide" style="background:var(--c);border-left:4px solid var(--m);padding:10px 12px;border-radius:8px;white-space:pre-line"></div>
  <button class="btn" onclick="start()">Faire une inscription</button>
  <button class="btn alt" onclick="show('suivi')">Suivre mon inscription</button></div>
- <div class="card"><h2 style="margin-top:0">Frais d'inscription : 1 000 HTG</h2><p>Vous téléversez la preuve de paiement dans le formulaire.</p></div>
+ <div class="card"><h2 style="margin-top:0" id="frais">Frais d'inscription : 1 000 HTG</h2><p id="fnote" style="white-space:pre-line">Vous téléversez la preuve de paiement dans le formulaire.</p></div>
  <div class="card"><h2 style="margin-top:0">Les étapes</h2><ol><li>Informations de l'élève</li><li>Informations des parents</li><li>Personne responsable</li><li>Documents</li><li>Paiement</li><li>Vérification</li><li>Confirmation et fiche à imprimer</li></ol>
- <p>Pour NS1 à NS4 : numéro d'ordre, fiche de 9ème année et relevé de notes sont aussi demandés.</p></div>
+ <p>Pour NS1 à NS4 : numéro d'ordre et fiche de 9ème année. Pour NS2 à NS4, le relevé de notes de la classe précédente peut être joint (facultatif).</p></div>
 </section>
 
 <section id="form" class="hide">
@@ -69,8 +70,15 @@ const P=g=>[["h",g=="pere"?"Père":"Mère"],[g,"nom","Nom","text"],[g,"prenom","
  [g,"profession","Profession / occupation","text"],[g,"telephone","Téléphone","tel"],
  [g,"residence","Résidence","text"],[g,"zone","Zone","text"],[g,"departement","Département","text"]];
 const R=[["nom","Nom"],["prenom","Prénom"],["profession","Profession / activité"],["cin","Numéro de carte d'identité"],["telephone","Téléphone","tel"],["residence","Résidence"],["zone","Zone"],["departement","Département"]].map(a=>["responsable",a[0],a[1],a[2]||"text",1]);
-const DOCS=[["acte_naissance","Acte de naissance"],["cin_responsable","Carte d'identité de la personne responsable"],["carnet","Carnet du dernier établissement fréquenté"],["photo","Photo récente"],["fiche_9eme","Fiche de 9ème année",1],["releve_notes","Relevé de notes de NS1 à NS4",1],["preuve_paiement","Preuve de paiement"]];
-const dl=k=>DOCS.find(x=>x[0]==k)[1];
+const D0=(l,r)=>({label:l,requis:r,actif:true});
+let CFG={frais_htg:1000,methodes_paiement:["MonCash","NatCash","Virement bancaire","Dépôt en espèces"],
+ accueil_intro:"",annonce:"",frais_note:"",paiement_instructions:"",
+ documents:{acte_naissance:D0("Acte de naissance",1),cin_responsable:D0("Carte d'identité de la personne responsable",1),carnet:D0("Carnet du dernier établissement fréquenté",1),photo:D0("Photo récente",1),fiche_9eme:D0("Fiche de 9ème année",1),releve_notes:D0("Relevé de notes",0),preuve_paiement:D0("Preuve de paiement",1)}};
+const DK=["acte_naissance","cin_responsable","carnet","photo","fiche_9eme","releve_notes","preuve_paiement"];
+let DOCS=[];
+const PV=()=>DOCS.find(x=>x[0]=="preuve_paiement");
+const fmt=n=>Number(n).toLocaleString("fr-FR")+" HTG";
+const dl=k=>(CFG.documents[k]||{}).label||k;
 const STEPS=[
 ["Informations de l'élève",[["eleve","nom","Nom","text",1],["eleve","prenom","Prénom","text",1],["eleve","date_naissance","Date de naissance","date",1],["eleve","lieu_naissance","Lieu de naissance","text",1],["eleve","sexe","Sexe","select",1,[["M","Masculin"],["F","Féminin"]]],["eleve","nisu","NISU (facultatif)","text"],["eleve","classe","Classe à intégrer","select",1,CL],["eleve","numero_ordre","Numéro d'ordre (NS1 à NS4)","text",1,0,1]]],
 ["Informations des parents",[...P("pere"),...P("mere")]],
@@ -84,15 +92,29 @@ function fld(a){const[g,k,l,t,r,o,n]=a;if(g=="h")return`<h2>${k}</h2>`;
  const i=t=="select"?`<select ${at} onchange="tg()"><option value="">Sélectionner</option>${o.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join("")}</select>`
  :`<input ${at} type="${t}" ${t=="tel"?'inputmode="tel" ':""}${t=="date"?`max="${new Date().toISOString().slice(0,10)}" `:""}autocomplete="off">`;
  return`<div class="${n?"ns hide":""}"><label for="${id}">${l}${r?" *":""}</label>${i}<div class="err" id="e_${id}"></div></div>`}
-const doc=([k,l,n])=>`<div class="${n?"ns hide":""}"><label>${l} *</label><label class="btn alt" for="d_${k}" id="b_${k}">Choisir un fichier</label><input type="file" class="hide" id="d_${k}" data-d="${k}" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onchange="pick('${k}')"><div class="f" id="i_${k}"></div><div class="err" id="e_d_${k}"></div></div>`;
+const doc=([k,l,n,o])=>`<div class="${n?"ns hide"+(n==2?" rel":""):""}"><label id="t_${k}">${l}${o?" (facultatif)":" *"}</label><label class="btn alt" for="d_${k}" id="b_${k}">Choisir un fichier</label><input type="file" class="hide" id="d_${k}" data-d="${k}"${o?' data-o="1"':""} accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onchange="pick('${k}')"><div class="f" id="i_${k}"></div><div class="err" id="e_d_${k}"></div></div>`;
 
+function build(){
+DOCS=DK.filter(k=>CFG.documents[k]&&CFG.documents[k].actif).map(k=>[k,CFG.documents[k].label,k=="fiche_9eme"?1:k=="releve_notes"?2:0,CFG.documents[k].requis?0:1]);
+STEPS[4][1][0][5]=CFG.methodes_paiement.map(x=>[x,x]);
+if(CFG.accueil_intro)$("intro").textContent=CFG.accueil_intro;
+$("annonce").textContent=CFG.annonce||"";$("annonce").classList.toggle("hide",!CFG.annonce);
+$("frais").textContent="Frais d'inscription : "+fmt(CFG.frais_htg);
+if(CFG.frais_note)$("fnote").textContent=CFG.frais_note;
 $("steps").innerHTML=STEPS.map((s,n)=>{let h=s[1]?s[1].map(fld).join(""):"";
- if(n==3)h=DOCS.slice(0,6).map(doc).join("");
- if(n==4)h=`<div class="card" style="background:var(--c)"><b>Montant à payer : 1 000 HTG</b></div>`+h+doc(DOCS[6]);
+ if(n==3)h=DOCS.filter(x=>x[0]!="preuve_paiement").map(doc).join("");
+ if(n==4)h=`<div class="card" style="background:var(--c)"><b>Montant à payer : ${fmt(CFG.frais_htg)}</b>${CFG.paiement_instructions?`<div class="f" style="white-space:pre-line">${esc(CFG.paiement_instructions)}</div>`:""}</div>`+h+(PV()?doc(PV()):"");
  if(n==5)h='<div id="rev"></div>';
  return`<div class="st hide" id="s${n}"><h2 style="margin-top:0">${s[0]}</h2>${h}</div>`}).join("");
+try{const o=JSON.parse(localStorage.getItem("cena")||"{}");for(const k in o)if($(k))$(k).value=o[k]}catch(_){}
+tg()}
+async function init(){
+ try{const r=await fetch(API+"/config",{method:"POST"});if(r.ok){const c=await r.json();CFG={...CFG,...c,documents:{...CFG.documents,...c.documents}}}}catch(_){}
+ build()}
 
-function tg(){const ns=/^NS[1-4]$/.test($("eleve_classe").value);document.querySelectorAll(".ns").forEach(e=>e.classList.toggle("hide",!ns))}
+function tg(){const ns=/^NS[1-4]$/.test($("eleve_classe").value);document.querySelectorAll(".ns").forEach(e=>e.classList.toggle("hide",!ns));
+ const c=$("eleve_classe").value,rel=/^NS[2-4]$/.test(c);document.querySelectorAll(".rel").forEach(e=>e.classList.toggle("hide",!rel));
+ if(rel&&$("t_releve_notes"))$("t_releve_notes").textContent=CFG.documents.releve_notes.label+" de NS"+(+c[2]-1)+(CFG.documents.releve_notes.requis?" *":" (facultatif)")}
 function pick(k){const i=$("d_"+k),f=i.files[0];$("e_d_"+k).textContent="";if(!f)return clr(k);
  if(!/\.(jpe?g|png|pdf)$/i.test(f.name)){i.value="";return fail(k,"Veuillez vérifier le format du fichier (JPG, PNG ou PDF).")}
  if(f.size>5242880){i.value="";return fail(k,"Fichier trop volumineux (5 Mo maximum).")}
@@ -105,12 +127,12 @@ function data(){const d={site_web:$("hp").value};
  ["eleve","pere","mere","responsable","paiement"].forEach(g=>{d[g]={};document.querySelectorAll(`[data-g=${g}]`).forEach(e=>{if(!e.closest(".ns.hide"))d[g][e.dataset.k]=e.value.trim()})});
  ["pere","mere"].forEach(g=>d[g].vivant=d[g].vivant!="0");return d}
 function sum(d){const e=d.eleve,r=d.responsable,p=g=>{const x=d[g];return x.nom||x.prenom?rows({Nom:`${x.prenom||""} ${x.nom||""}`,Statut:x.vivant?"Vivant(e)":"Décédé(e)",Profession:x.profession,Téléphone:x.telephone,Résidence:[x.residence,x.zone,x.departement].filter(Boolean).join(", ")}):rows({Information:"Non renseignée"})};
- const fs=DOCS.filter(x=>{const i=$("d_"+x[0]);return i&&i.files[0]&&!i.closest(".ns.hide")}).map(x=>x[1]);
+ const fs=DOCS.filter(x=>{const i=$("d_"+x[0]);return i&&i.files[0]&&!i.closest(".ns.hide")}).map(x=>x[0]=="releve_notes"?$("t_releve_notes").textContent.replace(/ \(facultatif\)| \*$/,""):x[1]);
  return`<h2>Élève</h2>`+rows({Nom:e.nom,Prénom:e.prenom,"Date de naissance":e.date_naissance,"Lieu de naissance":e.lieu_naissance,Sexe:e.sexe=="M"?"Masculin":e.sexe=="F"?"Féminin":"",NISU:e.nisu,Classe:clName(e.classe),"Numéro d'ordre":e.numero_ordre})
  +`<h2>Père</h2>${p("pere")}<h2>Mère</h2>${p("mere")}<h2>Responsable</h2>`
  +rows({Nom:`${r.prenom} ${r.nom}`,Profession:r.profession,CIN:r.cin,Téléphone:r.telephone,Résidence:[r.residence,r.zone,r.departement].filter(Boolean).join(", ")})
  +`<h2>Documents reçus</h2>`+fs.map(x=>`<div class="f">✔ ${x}</div>`).join("")
- +`<h2>Paiement</h2>`+rows({Montant:"1 000 HTG",Méthode:d.paiement.methode,Référence:d.paiement.reference_transaction})}
+ +`<h2>Paiement</h2>`+rows({Montant:fmt(CFG.frais_htg),Méthode:d.paiement.methode,Référence:d.paiement.reference_transaction})}
 
 let cur=0;
 const show=id=>{["home","form","done","suivi"].forEach(x=>$(x).classList.toggle("hide",x!=id));scrollTo(0,0)};
@@ -122,7 +144,7 @@ function go(n){cur=n;document.querySelectorAll(".st").forEach((e,i)=>e.classList
 function ok(n){const s=$("s"+n);s.querySelectorAll(".err").forEach(e=>e.textContent="");let good=true,first;
  const bad=(id,m)=>{$(id).textContent=m;good=false;first=first||$(id)};
  s.querySelectorAll("[data-r]").forEach(e=>{if(e.closest(".ns.hide")||e.value.trim())return;bad("e_"+e.id,e.id=="eleve_classe"?"Veuillez sélectionner une classe.":"Ce champ est obligatoire.")});
- s.querySelectorAll("[data-d]").forEach(e=>{if(e.closest(".ns.hide")||e.files[0])return;bad("e_d_"+e.dataset.d,e.dataset.d=="preuve_paiement"?"Veuillez téléverser la preuve de paiement.":"Ce document est obligatoire.")});
+ s.querySelectorAll("[data-d]").forEach(e=>{if(e.closest(".ns.hide")||e.dataset.o||e.files[0])return;bad("e_d_"+e.dataset.d,e.dataset.d=="preuve_paiement"?"Veuillez téléverser la preuve de paiement.":"Ce document est obligatoire.")});
  if(first)first.scrollIntoView({block:"center"});return good}
 function nextStep(){if(!ok(cur))return;cur==5?send():go(cur+1)}
 function save(){const o={};document.querySelectorAll("[data-g]").forEach(e=>o[e.id]=e.value);
@@ -151,6 +173,5 @@ async function suivre(){const o=$("sres");o.textContent="Recherche…";
  o.innerHTML=rows({"Numéro":j.numero,"Statut du dossier":SL[j.statut]||j.statut,"Paiement":PL[j.statut_paiement]||""})+(j.documents_manquants.length?`<p class="err">Document(s) manquant(s) : ${j.documents_manquants.map(k=>esc(dl(k))).join(", ")}</p>`:"")}
  catch(_){o.innerHTML='<p class="err">Connexion impossible.</p>'}}
 
-try{const o=JSON.parse(localStorage.getItem("cena")||"{}");for(const k in o)if($(k))$(k).value=o[k]}catch(_){}
-tg();
+init();
 </script></body></html>
