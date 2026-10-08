@@ -89,7 +89,7 @@ function dash(){const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(
  const c=f=>LIST.filter(f).length,t=x=>new Date(x.cree_le),by={};LIST.forEach(x=>by[x.classe]=(by[x.classe]||0)+1);
  const box=(n,l)=>`<div class="card" style="text-align:center;margin:0"><div style="font-size:28px;font-weight:800;color:var(--m)">${n}</div><div class="f">${l}</div></div>`;
  $("dash").innerHTML=`<div class="grid">`+box(LIST.length,"Total des inscriptions")+box(c(x=>t(x)>=d0),"Aujourd'hui")+box(c(x=>t(x)>=wk),"Cette semaine")
- +box(c(x=>x.pay=="en_attente"),"Paiements en attente")+box(c(x=>x.pay=="confirme"),"Paiements confirmés")+box(c(x=>x.statut=="documents_incomplets"),"Dossiers incomplets")+box(c(x=>x.statut=="valide"),"Dossiers validés")
+ +box(c(x=>x.pay=="en_attente"),"Paiements en attente")+box(c(x=>x.pay=="confirme"),"Paiements confirmés")+box(c(x=>x.statut=="documents_incomplets"),"Dossiers incomplets")+box(c(x=>x.statut=="valide"),"Dossiers validés")+box(c(x=>x.statut=="rejete"),"Dossiers refusés")
  +`</div><div class="card" style="margin-top:12px"><h2 style="margin-top:0">Inscriptions par classe</h2>`+CL.map(([k,l])=>`<div class="f">${l} : <b>${by[k]||0}</b></div>`).join("")+`</div>`}
 
 function flt(){const q=$("q").value.trim().toLowerCase(),c=$("fc").value,s=$("fs").value,p=$("fp").value,d=$("fd").value;
@@ -116,8 +116,10 @@ function render(){const r=D,p=one(r.paiements)||{};
  <div class="card"><h2 style="margin-top:0">Paiement</h2>${rows({Montant:p.montant_htg?fmt(p.montant_htg):"",Méthode:p.methode,Référence:p.reference_transaction,Date:p.date_paiement,Statut:PL[p.statut]})}
   <div class="row"><button class="btn" onclick="setPay('confirme')">Confirmer</button><button class="btn alt" onclick="setPay('refuse')">Refuser</button></div>
   <button class="btn alt" onclick="setPay('en_attente')">Remettre en attente</button></div>
- <div class="card"><h2 style="margin-top:0">Statut du dossier</h2><select id="st">${Object.entries(SL).map(([k,v])=>`<option value="${k}"${k==r.statut?" selected":""}>${v}</option>`).join("")}</select>
-  <button class="btn" onclick="setSt($('st').value)">Enregistrer le statut</button><button class="btn alt" onclick="setSt('valide')">Marquer comme validé</button></div>
+ <div class="card"><h2 style="margin-top:0">Décision sur le dossier</h2><div class="f" style="margin-bottom:6px">Statut actuel : <b>${SL[r.statut]}</b></div>
+  <div class="row"><button class="btn" onclick="decide('valide')">✔ Accepter</button><button class="btn alt" onclick="decide('rejete')">✖ Refuser</button></div>
+  <button class="btn alt" onclick="decide('documents_incomplets')">⚠ Dossier incomplet</button><label>Autre statut</label><select id="st">${Object.entries(SL).map(([k,v])=>`<option value="${k}"${k==r.statut?" selected":""}>${v}</option>`).join("")}</select>
+  <button class="btn" onclick="setSt($('st').value)">Enregistrer le statut</button></div>
  <div class="card"><h2 style="margin-top:0">Remarques</h2>${rem}<textarea id="rt" rows="3" placeholder="Ajouter une remarque" style="margin-top:8px"></textarea><button class="btn alt" onclick="addr()">Ajouter la remarque</button></div>
  <button class="btn" onclick="imprimer()">Imprimer la fiche</button>`}
 
@@ -125,6 +127,11 @@ async function upd(table,match,vals){const{error}=await sb.from(table).update(va
 async function setPay(s){const u=(await sb.auth.getUser()).data.user;
  if(await upd("paiements",{inscription_id:D.id},{statut:s,verifie_le:new Date().toISOString(),verifie_par:u.id})){await load();ouvrir(D.id)}}
 async function setSt(v){if(await upd("inscriptions",{id:D.id},{statut:v})){await load();ouvrir(D.id)}}
+async function decide(s){const l={valide:"accepter ce dossier",rejete:"refuser ce dossier",documents_incomplets:"marquer ce dossier comme incomplet"}[s];
+ const m=prompt("Vous allez "+l+".\nMotif ou remarque (facultatif) :","");if(m===null)return;
+ if(!(await upd("inscriptions",{id:D.id},{statut:s})))return;
+ if(m.trim()){const u=(await sb.auth.getUser()).data.user;await sb.from("remarques").insert({inscription_id:D.id,texte:SL[s]+" — "+m.trim(),auteur:u.id})}
+ await load();ouvrir(D.id)}
 async function dflag(id,f,v){if(await upd("documents",{id},{[f]:v}))ouvrir(D.id)}
 async function dopen(i,dl){const d=D.documents[i];
  const{data,error}=await sb.storage.from("dossiers").createSignedUrl(d.chemin,300,dl?{download:true}:undefined);
