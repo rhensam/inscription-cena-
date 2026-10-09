@@ -45,7 +45,7 @@ header{background:var(--m);color:#fff;position:sticky;top:0;z-index:20;box-shado
 @media(min-width:860px){.hero{height:620px;max-height:none;border-radius:0 0 34px 34px}.hc{left:max(16px,calc(50% - 540px));right:auto;bottom:44px;width:min(580px,calc(100% - 32px));border-radius:24px;padding:28px}.nv{top:50%}}
 /* Sections */
 .sec{max-width:1080px;margin:0 auto;padding:38px 16px 4px}
-.st{font-family:var(--serif);font-size:clamp(22px,5.5vw,30px);color:var(--m);margin:0 0 6px}
+.stt{font-family:var(--serif);font-size:clamp(22px,5.5vw,30px);color:var(--m);margin:0 0 6px}
 .sub{color:#6b5a50;margin:0 0 20px}
 .gr{display:grid;gap:14px;grid-template-columns:1fr}
 @media(min-width:600px){.gr{grid-template-columns:repeat(2,1fr)}}
@@ -98,6 +98,23 @@ input:focus,select:focus{outline:none;border-color:var(--m2);box-shadow:0 0 0 3p
 .hide{display:none!important}
 #fiche{display:none}
 @media print{body{background:#fff}header,footer,#home,main>*:not(#fiche){display:none!important}#fiche{display:block}body.onhome main{display:block}}
+/* Ajustement : informations visibles plus vite */
+.hero{height:min(66svh,540px);min-height:460px}
+.hc{padding:16px 16px 20px}
+.ht{font-size:clamp(24px,6.6vw,40px);margin:10px 0 8px}
+.hp{font-size:15px;margin-bottom:12px}
+.hb{min-height:50px}.hb.s{min-height:44px}
+.nv{top:24%}
+#home{display:flex;flex-direction:column}
+#home>section{width:100%}
+#home>.ann{order:0}
+#home>.hero{order:1}
+#home>section:nth-of-type(3){order:2}
+#home>section:nth-of-type(2){order:3}
+#home>section:nth-of-type(4){order:4}
+#home>section:nth-of-type(5){order:5}
+#home>section:nth-of-type(6){order:6}
+@media(min-width:860px){.hero{height:560px}.nv{top:50%}}
 </style></head><body class="onhome">
 <header><div class="hin">
  <div class="brand" onclick="show('home')"><div class="logo">CENA</div><div><b>Collège Évangélique Le Normalien de L'Arcahaie</b><small>Inscriptions en ligne</small></div></div>
@@ -125,7 +142,7 @@ input:focus,select:focus{outline:none;border-color:var(--m2);box-shadow:0 0 0 3p
   <div class="dts" id="dts"></div>
  </section>
 
- <section class="sec rv"><h2 class="st">Comment ça marche</h2><p class="sub">Quatre étapes simples, entièrement depuis votre téléphone.</p>
+ <section class="sec rv"><h2 class="stt">Comment ça marche</h2><p class="sub">Quatre étapes simples, entièrement depuis votre téléphone.</p>
   <div class="gr g4">
    <div class="sc"><span class="n">1</span><h3>Remplissez le formulaire</h3><p>Élève, parents et personne responsable, étape par étape.</p></div>
    <div class="sc"><span class="n">2</span><h3>Joignez vos documents</h3><p>Photo, acte de naissance, carnet… directement depuis votre téléphone.</p></div>
@@ -135,7 +152,7 @@ input:focus,select:focus{outline:none;border-color:var(--m2);box-shadow:0 0 0 3p
 
  <section class="sec rv"><div class="fee"><div class="fi">💳</div><div><h2 id="frais">Frais d'inscription : 1 000 HTG</h2><p id="fnote">Vous téléversez la preuve de paiement dans le formulaire.</p></div></div></section>
 
- <section class="sec rv"><h2 class="st">Documents à préparer</h2><p class="sub">Ayez ces documents sous la main (photo ou PDF). La liste exacte s'affiche dans le formulaire.</p>
+ <section class="sec rv"><h2 class="stt">Documents à préparer</h2><p class="sub">Ayez ces documents sous la main (photo ou PDF). La liste exacte s'affiche dans le formulaire.</p>
   <div class="gr">
    <div class="dc">📄 Acte de naissance</div><div class="dc">🪪 Carte d'identité de la personne responsable</div>
    <div class="dc">📘 Carnet du dernier établissement fréquenté</div><div class="dc">🖼️ Photo récente</div>
@@ -143,7 +160,7 @@ input:focus,select:focus{outline:none;border-color:var(--m2);box-shadow:0 0 0 3p
   </div>
   <p class="note">NS1 à NS4 : numéro d'ordre et fiche de 9ème année. NS2 à NS4 : le relevé de notes de la classe précédente peut être joint (facultatif).</p></section>
 
- <section class="sec rv"><div class="ab"><h2 class="st">Le collège</h2><p id="intro">Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p></div></section>
+ <section class="sec rv"><div class="ab"><h2 class="stt">Le collège</h2><p id="intro">Inscrivez votre enfant au Collège Évangélique Le Normalien de L'Arcahaie, depuis votre téléphone.</p></div></section>
 
  <section class="sec rv"><div class="band"><h2>Prêt à inscrire votre enfant ?</h2><button class="hb p" onclick="start()">COMMENCER MON INSCRIPTION →</button></div></section>
 </div>
@@ -228,7 +245,8 @@ try{const o=JSON.parse(localStorage.getItem("cena")||"{}");for(const k in o)if($
 tg()}
 async function init(){
  try{const r=await fetch(API+"/config",{method:"POST"});if(r.ok){const c=await r.json();CFG={...CFG,...c,documents:{...CFG.documents,...c.documents}}}}catch(_){}
- build()}
+ build();
+ const ph=(CFG.photos||[]).filter(p=>p&&p.src);if(ph.length){slides(ph);play()}}
 
 function tg(){const ns=/^NS[1-4]$/.test($("eleve_classe").value);document.querySelectorAll(".ns").forEach(e=>e.classList.toggle("hide",!ns));
  const c=$("eleve_classe").value,rel=/^NS[2-4]$/.test(c);document.querySelectorAll(".rel").forEach(e=>e.classList.toggle("hide",!rel));
@@ -305,12 +323,15 @@ function goS(n){const s=document.querySelectorAll(".sl"),d=document.querySelecto
  ci=(n+s.length)%s.length;s.forEach((e,i)=>e.classList.toggle("on",i==ci));d.forEach((e,i)=>e.classList.toggle("on",i==ci));play()}
 function play(){clearInterval(ct);if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;ct=setInterval(()=>goS(ci+1),4500)}
 function menu(a){$("nv").classList.remove("open");a()}
-function homeInit(){
- if(LOGO_URL)document.querySelectorAll(".logo").forEach(l=>l.innerHTML=`<img src="${esc(LOGO_URL)}" alt="CENA" style="width:100%;height:100%;object-fit:contain">`);
- const S=PHOTOS.length?PHOTOS:DEMO;
+function slides(S){
  const bg=v=>`url('data:image/svg+xml,${encodeURIComponent(v)}')`;
  $("cs").innerHTML=S.map((s,i)=>s.src?`<div class="sl${i?"":" on"}"><img src="${esc(s.src)}" alt="${esc(s.titre||"Élèves du CENA")}"${i?' loading="lazy"':""}></div>`:`<div class="sl${i?"":" on"}" style="background-image:${bg(s.svg)}"></div>`).join("");
  $("dts").innerHTML=S.map((s,i)=>`<button class="dt${i?"":" on"}" aria-label="Photo ${i+1}" onclick="goS(${i})"></button>`).join("");
+ ci=0}
+function homeInit(){
+ if(LOGO_URL)document.querySelectorAll(".logo").forEach(l=>l.innerHTML=`<img src="${esc(LOGO_URL)}" alt="CENA" style="width:100%;height:100%;object-fit:contain">`);
+ const S=PHOTOS.length?PHOTOS:DEMO;
+ slides(PHOTOS.length?PHOTOS:DEMO);
  if(CONTACT.tel){$("ct_tel").textContent="📞 "+CONTACT.tel;$("ct_tel").classList.remove("hide")}
  if(CONTACT.email){$("ct_mail").textContent="✉️ "+CONTACT.email;$("ct_mail").classList.remove("hide")}
  $("yr").textContent=new Date().getFullYear();
@@ -324,30 +345,3 @@ function homeInit(){
 homeInit();
 init();
 </script></body></html>
-<style>
-/* Ajustement : les informations (frais, étapes) apparaissent plus vite */
-.hero{height:min(66svh,540px);min-height:460px}
-.hc{padding:16px 16px 20px}
-.ht{font-size:clamp(24px,6.6vw,40px);margin:10px 0 8px}
-.hp{font-size:15px;margin-bottom:12px}
-.hb{min-height:50px}.hb.s{min-height:44px}
-.nv{top:24%}
-#home{display:flex;flex-direction:column}
-#home>section{width:100%}
-#home>.ann{order:0}
-#home>.hero{order:1}
-#home>section:nth-of-type(3){order:2}
-#home>section:nth-of-type(2){order:3}
-#home>section:nth-of-type(4){order:4}
-#home>section:nth-of-type(5){order:5}
-#home>section:nth-of-type(6){order:6}
-@media(min-width:860px){.hero{height:560px}.nv{top:50%}}
-</style>
-<script>
-// Photos du carrousel venant de l'administration (remplacent les illustrations)
-(async()=>{try{const r=await fetch(API+"/config",{method:"POST"});if(!r.ok)return;const c=await r.json();
- const P=(c.photos||[]).filter(p=>p&&p.src);if(!P.length)return;
- $("cs").innerHTML=P.map((p,i)=>`<div class="sl${i?"":" on"}"><img src="${esc(p.src)}" alt="${esc(p.titre||"Élèves du CENA")}"${i?' loading="lazy"':""}></div>`).join("");
- $("dts").innerHTML=P.map((p,i)=>`<button class="dt${i?"":" on"}" aria-label="Photo ${i+1}" onclick="goS(${i})"></button>`).join("");
- ci=0;play()}catch(_){}})();
-</script>
