@@ -215,7 +215,7 @@ const PV=()=>DOCS.find(x=>x[0]=="preuve_paiement");
 const fmt=n=>Number(n).toLocaleString("fr-FR")+" HTG";
 const dl=k=>(CFG.documents[k]||{}).label||k;
 const STEPS=[
-["Informations de l'élève",[["eleve","nom","Nom","text",1],["eleve","prenom","Prénom","text",1],["eleve","date_naissance","Date de naissance","date",1],["eleve","lieu_naissance","Lieu de naissance","text",1],["eleve","sexe","Sexe","select",1,[["M","Masculin"],["F","Féminin"]]],["eleve","nisu","NISU (facultatif)","text"],["eleve","classe","Classe à intégrer","select",1,CL],["eleve","numero_ordre","Numéro d'ordre (NS1 à NS4)","text",1,0,1]]],
+["Informations de l'élève",[["eleve","nom","Nom","text",1],["eleve","prenom","Prénom","text",1],["eleve","date_naissance","Date de naissance","date",1],["eleve","lieu_naissance","Lieu de naissance","text",1],["eleve","sexe","Sexe","select",1,[["M","Masculin"],["F","Féminin"]]],["eleve","nisu","NISU (facultatif)","text"],["eleve","classe","Classe à intégrer","select",1,CL],["eleve","numero_ordre","Numéro d'ordre,"text",1,0,1]]],
 ["Informations des parents",[...P("pere"),...P("mere")]],
 ["Personne responsable",R],
 ["Documents requis",null],
